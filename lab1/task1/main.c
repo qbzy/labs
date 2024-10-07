@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-#include <ctype.h>
+#include <string.h>
+
+#define ARR_SIZE 101
 
 enum Errors {
     OK,
@@ -25,7 +27,9 @@ enum Errors flags_validation(int argc, char *argv[]) {
     if (argv[2][0] != '-' && argv[2][0] != '/') {
         return INVALID_INPUT;
     }
-
+    if (strlen(argv[2]) > 2){
+        return INVALID_INPUT;
+    }
     if (argv[2][1] != 'h' && argv[2][1] != 'p'
         && argv[2][1] != 's' && argv[2][1] != 'e'
         && argv[2][1] != 'a' && argv[2][1] != 'f') {
@@ -60,7 +64,7 @@ enum Errors str_to_long(const char *str, unsigned long long int *converted_x) {
 
 
 
-int *h_func(const unsigned long long int number, int result[], int *count) {
+int *h_func(const unsigned long long int number, int result[], int count[]) {
 
 
     for (int i = 1, j = 0; i <= 100; i++) {
@@ -75,8 +79,10 @@ int *h_func(const unsigned long long int number, int result[], int *count) {
 
 enum Errors h_validation(const char *str_x, unsigned long long int *converted_x) {
 
-    if (str_to_long(str_x, converted_x) != OK) {
-        return str_to_long(str_x, converted_x);
+    enum Errors status = str_to_long(str_x, converted_x);
+    if ( status != OK)
+    {
+        return status;
     }
 
     if (*converted_x <= 0) {
@@ -88,7 +94,7 @@ enum Errors h_validation(const char *str_x, unsigned long long int *converted_x)
 
 int is_prime(unsigned long long int value) {
 
-    for (unsigned long long int i = 2; i <= ((unsigned long long int) sqrtl(value) + 1); i++) {
+    for (unsigned long long int i = 2; i * i < value; i++) {
         if (value % i == 0) {
             return 0;
         }
@@ -97,55 +103,43 @@ int is_prime(unsigned long long int value) {
     return 1;
 
 }
-enum Errors s_validation(const char *str) {
+enum Errors s_validation(const char *str, unsigned long long int *converted_x) {
     if (str == NULL) {
         return NULL_PTR_ERROR;
     }
-
-    if (!(isdigit(*str) || (*str == 'A') || (*str == 'B') || (*str == 'C') || (*str == 'D') || (*str == 'E')
-          || (*str == 'F') || (*str == 'a') || (*str == 'b') || (*str == 'c') || (*str == 'd') || (*str == 'e')
-          || (*str == 'f'))) {
-        return INVALID_INPUT;
+    enum Errors status = str_to_long(str, converted_x);
+    if ( status != OK)
+    {
+        return status;
     }
     return OK;
 }
 
 
-enum Errors str_radix16(char *str, char result[], int *flag_n) {
-    int flag = 1;
-    int i = 0;
-    *flag_n = 1;
+enum Errors str_radix16(unsigned long long int number, char result[]) {
 
-    if (str == NULL || result == NULL) {
+    unsigned long long num = number;
+    int i = 1, j, k=0, temp;
+    char result_t[BUFSIZ];
+
+    if (result == NULL) {
         return NULL_PTR_ERROR;
     }
-    if (*str == '-'){
-        *flag_n = -1;
-        result[i] = '-';
-        i++;
-        str++;
+
+    while (num != 0) {
+        temp = num % 16;
+
+        if (temp < 10)
+            temp = temp + '0';
+        else
+            temp = temp + 'A' - 10;
+        result_t[i++] = temp;
+        num = num / 16;
     }
-
-    for (;*str != '\0'; str++){
-        if (*str == '0' && flag){
-
-            continue;
-        }
-        else{
-            flag = 0;
-        }
-        if (s_validation(str) != OK){
-            return s_validation(str);
-        }
-
-        else {
-            result[i] = *str;
-            i++;
-        }
-
-        result[i] = '\0';
-
+    for (j = i - 1; j > 0; --j, ++k){
+        result[k] = result_t[j];
     }
+    result_t[k] = '\0';
 
 
     return OK;
@@ -155,8 +149,10 @@ enum Errors e_validation(const char *str, unsigned long long int *converted_x){
         return NULL_PTR_ERROR;
     }
 
-    if (str_to_long(str, converted_x) != OK){
-        return str_to_long(str, converted_x);
+    enum Errors status = str_to_long(str, converted_x);
+    if ( status != OK)
+    {
+        return status;
     }
 
     if (*converted_x > 10 || *converted_x < 1){
@@ -190,8 +186,10 @@ enum Errors a_validation(const char *str, unsigned long long int *converted_x){
         return NULL_PTR_ERROR;
     }
 
-    if (str_to_long(str, converted_x) != OK){
-        return str_to_long(str, converted_x);
+    enum Errors status = str_to_long(str, converted_x);
+    if ( status != OK)
+    {
+        return status;
     }
 
     if (*converted_x <= 1){
@@ -217,8 +215,10 @@ enum Errors f_validation(const char *str, unsigned long long int *converted_x){
         return NULL_PTR_ERROR;
     }
 
-    if (str_to_long(str, converted_x) != OK){
-        return str_to_long(str, converted_x);
+    enum Errors status = str_to_long(str, converted_x);
+    if ( status != OK)
+    {
+        return status;
     }
 
     if (*converted_x < 0){
@@ -233,14 +233,11 @@ enum Errors factorial(unsigned long long int *factorial, unsigned long long int 
     if (factorial == NULL){
         return NULL_PTR_ERROR;
     }
-
+    if (number > 20){
+        return RANGE_ERROR;
+    }
     for (long int i = 2; i <= number; i++){
-        if (*factorial  > ULLONG_MAX / i){
-            return RANGE_ERROR;
-        }
-        else{
-            *factorial *= i;
-        }
+        *factorial *= i;
     }
     return OK;
 }
@@ -248,8 +245,10 @@ enum Errors factorial(unsigned long long int *factorial, unsigned long long int 
 enum Errors p_validation(const char *argv, unsigned long long int *converted_x) {
 
 
-    if (str_to_long(argv, converted_x) != OK) {
-        return str_to_long(argv, converted_x);
+    enum Errors status = str_to_long(argv, converted_x);
+    if ( status != OK)
+    {
+        return status;
     }
 
     if (*converted_x <= 1) {
@@ -291,7 +290,7 @@ int main(int argc, char *argv[]) {
                     return RANGE_ERROR;
                 case (OK):
                     int count = 0;
-                    int arr[101];
+                    int arr[ARR_SIZE];
                     int *result = h_func(value, arr, &count);
                     if (count == 0) {
                         printf("There aren`t any numbers that are completely divisible by x = %llu\n", value);
@@ -332,9 +331,9 @@ int main(int argc, char *argv[]) {
             break;
 
         case ('s'):
-            char result[BUFSIZ];
-            int flag_n = 1;
-            switch (str_radix16(argv[1], result, &flag_n)) {
+
+
+            switch (s_validation(argv[1], &value)){
                 case (INVALID_INPUT):
                     printf("ERROR: Invalid input");
                     return INVALID_INPUT;
@@ -345,17 +344,24 @@ int main(int argc, char *argv[]) {
                     printf("ERROR: Range error");
                     return RANGE_ERROR;
                 case(OK):
+                    char result[BUFSIZ];
 
-                    char *ptr;
-                    ptr = result;
-
-                    if (flag_n == -1){
-                        printf("-");
-                        ptr++;
-                    }
-
-                    for(;*ptr != '\0'; ptr++){
-                        printf("%c ", *ptr);
+                    switch (str_radix16(value, result)) {
+                        case (INVALID_INPUT):
+                            printf("ERROR: Invalid input");
+                            return INVALID_INPUT;
+                        case (NULL_PTR_ERROR):
+                            printf("ERROR: Null pointer error");
+                            return NULL_PTR_ERROR;
+                        case (RANGE_ERROR):
+                            printf("ERROR: Range error");
+                            return RANGE_ERROR;
+                        case(OK):
+                            char *ptr;
+                            ptr = result;
+                            for(;*ptr != '\0'; ++ptr){
+                                printf("%c", *ptr);
+                            }
                     }
             }
             break;
