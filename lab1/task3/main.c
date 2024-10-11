@@ -259,6 +259,10 @@ int main(int argc, char *argv[]) {
                     printf("ERROR: Range error");
                     return RANGE_ERROR;
                 case (OK):
+                    if ((epsilon < 0) || (epsilon >= 1)){
+                        printf("ERROR: Range error");
+                        return RANGE_ERROR;
+                    }
                     break;
             }
             switch (str_to_double(argv[3], &side1)) {
@@ -338,6 +342,10 @@ int main(int argc, char *argv[]) {
                     printf("ERROR: Range error");
                     return RANGE_ERROR;
                 case (OK):
+                    if ((eps < 0) || (eps >= 1)){
+                        printf("ERROR: Range error");
+                        return RANGE_ERROR;
+                    }
                     break;
             }
             switch (str_to_double(argv[3], &coef1)) {
