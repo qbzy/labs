@@ -104,24 +104,11 @@ enum Errors swap_min_max(long int **array, long int size) {
     return OK;
 }
 
-void bubble_sort(long int **array, long int size) {
-    for (int i = 0; i < size - 1; i++) {
-        for (int j = 0; j < size - i - 1; j++) {
-            if (labs((*array)[j]) > labs((*array)[j + 1])) {
-                int temp = (*array)[j];
-                (*array)[j] = (*array)[j + 1];
-                (*array)[j + 1] = temp;
-            }
-        }
-    }
-}
-
-
 long int find_closest(long int **array, long int size, long int number) {
     int low = 0, high = size - 1;
     while (low <= high) {
         int mid = low + (high - low) / 2;
-        long int diff = labs((*array)[mid] - number);
+        long int diff = (*array)[mid] - number;
         if (diff == 0) {
             return (*array)[mid];
         }
@@ -131,15 +118,15 @@ long int find_closest(long int **array, long int size, long int number) {
             high = mid - 1;
         }
     }
+    if (labs((*array)[low] - number) > labs((*array)[high] - number)){
+        return (*array)[high];
+}
+    return (*array)[low];
+}
 
-    if (low == 0) {
-        return (*array)[0];
-    }
-    if (low > 0 && labs((*array)[low] - number) < labs((*array)[low - 1] - number))
-        return (*array)[low];
-    else if (low > 0)
-        return (*array)[low - 1];
-    return 0;
+int comp (const void * a, const void* b)
+{
+    return (*((int *)(a)) - *((int*)(b)));
 }
 
 enum Errors generate_array_and_find_closest(long int **array_a, long int size_of_array_a,
@@ -156,7 +143,8 @@ enum Errors generate_array_and_find_closest(long int **array_a, long int size_of
         return INVALID_MEMORY;
     }
 
-    bubble_sort(array_b, size_of_array_b);
+    qsort(*array_b, size_of_array_b, sizeof(long int), comp);
+
 
     for (int i = 0; i < size_of_array_a; ++i) {
         (*array_c)[i] = (*array_a)[i] + find_closest(array_b, size_of_array_b, (*array_a)[i]);
@@ -326,8 +314,10 @@ int main(int argc, char *argv[]) {
             free(a_arr);
             free(b_arr);
             free(c_arr);
-
-
+            break;
+        default:
+            printf("ERROR: INVALID INPUT");
+            return INVALID_INPUT;
     }
 
 
