@@ -63,7 +63,7 @@ enum Errors nums_input(long long int arr[], int base, long long int *maxi, int *
         char flagger[] = "Stop";
 
 
-        scanf("%512s", number);
+        scanf("%100s", number);
 
         if (strcmp(number, flagger) == 0){
             flag = 0;
@@ -77,7 +77,6 @@ enum Errors nums_input(long long int arr[], int base, long long int *maxi, int *
                 if (llabs(num) > llabs(*maxi)){
                     *maxi = num;
                 }
-                arr[counter] = num;
                 counter++;
             }
         }

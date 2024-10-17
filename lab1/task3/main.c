@@ -98,10 +98,7 @@ enum Errors flags_validation(int argc, char *argv[]) {
 }
 
 enum Errors divisibles(long long int num1, long long int num2) {
-    if (num1 % num2 != 0) {
-        return 1;
-    }
-    return 0;
+    return  (num1 % num2 != 0);
 }
 
 int range_double(long double num1, long double num2) {
