@@ -10,6 +10,7 @@ enum Errors {
     INVALID_PATH,
     NULL_PTR_ERROR,
     INVALID_DATA,
+    RANGE_ERROR,
 };
 
 
@@ -33,6 +34,7 @@ enum Errors validation(int argc, char *argv[]) {
     }
     f_out = fopen(argv[2], "r+");
     if (f_out == NULL) {
+        fclose(f);
         return INVALID_PATH;
     }
 
@@ -47,13 +49,10 @@ enum Errors base_identifier(char *str, int *max_digit) {
     int value;
     char c;
     int size;
-    int flag=1;
     if (str == NULL || max_digit == NULL) {
         return NULL_PTR_ERROR;
     }
-    if (str[0] == '-'){
-        flag = -1;
-    }
+
     *max_digit = 1;
     size = strlen(str);
     for (int i = 0; i < size; i++) {
@@ -82,16 +81,51 @@ enum Errors base_identifier(char *str, int *max_digit) {
     return OK;
 }
 
-
-int main(int argc, char *argv[]) {
-    FILE *f;
-    FILE *f_out;
+enum Errors file_input(FILE *f, FILE *f_out) {
     char *delimiters = " \t\n";
     char buf[BUFSIZ];
     char *cur_num;
     char *endptr;
     int base;
     long int decimal_num;
+    while (fgets(buf, sizeof(buf), f)) {
+        cur_num = strtok(buf, delimiters);
+        while (cur_num != NULL) {
+            switch (base_identifier(cur_num, &base)) {
+                case (INVALID_INPUT):
+                    return INVALID_INPUT;
+                case (NULL_PTR_ERROR):
+                    return NULL_PTR_ERROR;
+                case (INVALID_PATH):
+
+                    return INVALID_PATH;
+                case RANGE_ERROR:
+                    return RANGE_ERROR;
+                case (INVALID_DATA):
+                    return INVALID_DATA;
+                case (OK):
+                    decimal_num = strtol(cur_num, &endptr, base);
+
+                    if (decimal_num == LONG_MIN || decimal_num == LONG_MAX){
+                        return RANGE_ERROR;
+                    }
+                    if (*endptr != '\0') {
+                        return INVALID_DATA;
+                    }
+                    fprintf(f_out, "%ld %d\n", decimal_num, base);
+                    cur_num = strtok(NULL, delimiters);
+                    base = 1;
+                    break;
+            }
+        }
+    }
+    return OK;
+}
+
+int main(int argc, char *argv[]) {
+    FILE *f;
+    FILE *f_out;
+
     switch (validation(argc, argv)) {
         case (INVALID_INPUT):
             printf("ERROR: Invalid input");
@@ -105,57 +139,48 @@ int main(int argc, char *argv[]) {
         case (INVALID_DATA):
             printf("ERROR: Invalid data");
             return INVALID_DATA;
+        case RANGE_ERROR:
+            printf("ERROR: Range error");
+            return RANGE_ERROR;
         case (OK):
             break;
     }
     f = fopen(argv[1], "r");
     f_out = fopen(argv[2], "r+");
 
-    while (fgets(buf, sizeof(buf), f)) {
-        cur_num = strtok(buf, delimiters);
-        while (cur_num != NULL) {
-            switch (base_identifier(cur_num, &base)) {
-                case (INVALID_INPUT):
-                    fclose(f);
-                    fclose(f_out);
-                    printf("ERROR: Invalid input");
-                    return INVALID_INPUT;
-                case (NULL_PTR_ERROR):
-                    fclose(f);
-                    fclose(f_out);
-                    printf("ERROR: Null pointer error");
-                    return NULL_PTR_ERROR;
-                case (INVALID_PATH):
-                    fclose(f);
-                    fclose(f_out);
-                    printf("ERROR: Invalid path");
-                    return INVALID_PATH;
-                case (INVALID_DATA):
-                    fclose(f);
-                    fclose(f_out);
-                    printf("ERROR: Invalid data");
-                    return INVALID_DATA;
-                case (OK):
-                    decimal_num = strtol(cur_num, &endptr, base);
-                    if (*endptr != '\0') {
-                        fclose(f);
-                        fclose(f_out);
-                        printf("ERROR: Invalid data");
-                        return INVALID_DATA;
-                    }
-                    fprintf(f_out, "%ld %d\n", decimal_num, base);
-                    cur_num = strtok(NULL, delimiters);
-                    base = 1;
-                    break;
-            }
-
-        }
-
-
+    switch (file_input(f, f_out)) {
+        case (INVALID_INPUT):
+            if(f != NULL) fclose(f);
+            if (f_out != NULL) fclose(f_out);
+            printf("ERROR: Invalid input");
+            return INVALID_INPUT;
+        case (NULL_PTR_ERROR):
+            if(f != NULL) fclose(f);
+            if (f_out != NULL) fclose(f_out);
+            printf("ERROR: Null pointer error");
+            return NULL_PTR_ERROR;
+        case (INVALID_PATH):
+            if(f != NULL) fclose(f);
+            if (f_out != NULL) fclose(f_out);
+            printf("ERROR: Invalid path");
+            return INVALID_PATH;
+        case (INVALID_DATA):
+            if(f != NULL) fclose(f);
+            if (f_out != NULL) fclose(f_out);
+            printf("ERROR: Invalid data");
+            return INVALID_DATA;
+        case RANGE_ERROR:
+            if(f != NULL) fclose(f);
+            if (f_out != NULL) fclose(f_out);
+            printf("ERROR: Range error");
+            return RANGE_ERROR;
+        case (OK):
+            printf("Done");
+            fclose(f);
+            fclose(f_out);
+            break;
     }
-    printf("Done");
-    fclose(f);
-    fclose(f_out);
-
+    if(f != NULL) fclose(f);
+    if (f_out != NULL) fclose(f_out);
 
 }
