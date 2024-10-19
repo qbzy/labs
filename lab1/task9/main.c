@@ -191,7 +191,6 @@ int main(int argc, char *argv[]) {
                     return NULL_PTR_ERROR;
                 case (INVALID_MEMORY):
                     printf("ERROR: INVALID_MEMORY");
-                    free(res);
                     return INVALID_MEMORY;
                 case (OK):
                     break;
@@ -212,11 +211,7 @@ int main(int argc, char *argv[]) {
                 case (NULL_PTR_ERROR):
                     printf("ERROR: NULL_PTR_ERROR");
                     return NULL_PTR_ERROR;
-                case (INVALID_MEMORY):
-                    printf("ERROR: INVALID_MEMORY");
-                    free(res);
-                    return INVALID_MEMORY;
-                case (OK):
+                default:
                     break;
             }
 
@@ -236,8 +231,8 @@ int main(int argc, char *argv[]) {
 
             srand(time(NULL));
 
-            long int size_a = rand() % (10000 - 10 + 1) + 10;
-            long int size_b = rand() % (10000 - 10 + 1) + 10;
+            long int size_a = 10;//rand() % (10000 - 10 + 1) + 10;
+            long int size_b = 10;//rand() % (10000 - 10 + 1) + 10;
 
             switch (array_gen(&a_arr, -1000, 1000, size_a)) {
                 case (INVALID_INPUT):
@@ -251,7 +246,7 @@ int main(int argc, char *argv[]) {
                     return NULL_PTR_ERROR;
                 case (INVALID_MEMORY):
                     printf("ERROR: INVALID_MEMORY");
-                    free(a_arr);
+                    //free(a_arr);
                     return INVALID_MEMORY;
                 case (OK):
                     break;
@@ -270,7 +265,7 @@ int main(int argc, char *argv[]) {
                 case (INVALID_MEMORY):
                     printf("ERROR: INVALID_MEMORY");
                     free(a_arr);
-                    free(b_arr);
+                    //free(b_arr);
                     return INVALID_MEMORY;
                 case (OK):
                     break;
@@ -300,7 +295,7 @@ int main(int argc, char *argv[]) {
                     printf("ERROR: INVALID_MEMORY");
                     free(a_arr);
                     free(b_arr);
-                    free(c_arr);
+                   // free(c_arr);
                     return INVALID_MEMORY;
                 case (OK):
                     break;

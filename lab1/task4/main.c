@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <windows.h>
 
 enum Errors {
     OK,
@@ -47,6 +48,25 @@ enum Errors flags_validation(int argc, char *argv[]) {
         }
 
     }
+    else{
+        return INVALID_INPUT;
+    }
+    return OK;
+}
+
+enum Errors get_full_path(char *path1, char *path2){
+
+    char fullPath1[MAX_PATH], fullPath2[MAX_PATH];
+
+    if (!path1 || !path2){
+        return NULL_PTR_ERROR;
+    }
+    GetFullPathName(path1, MAX_PATH, fullPath1, NULL);
+    GetFullPathName(path2, MAX_PATH, fullPath2, NULL);
+
+    if (strcmp(fullPath1, fullPath2) == 0){
+        return INVALID_INPUT;
+    }
     return OK;
 }
 
@@ -58,9 +78,10 @@ enum Errors path_validation_with_n(char *argv[]) {
     } else {
         fclose(f);
     }
+    enum Errors status = get_full_path(argv[2], argv[3]);
 
-    if (strcmp(argv[2], argv[3]) == 0) {
-        return INVALID_INPUT;
+    if (status != OK) {
+        return status;
     }
 
     FILE *f_out = fopen(argv[3], "r+");
@@ -208,41 +229,34 @@ int main(int argc, char *argv[]) {
                 case (OK):
                     break;
             }
-
+            f = fopen(argv[2], "r");
+            f_out = fopen(argv[3], "w");
             switch (argv[1][2]) {
                 case ('d'):
-                    f = fopen(argv[2], "r");
-                    f_out = fopen(argv[3], "w");
+
                     d_func(f, f_out);
                     printf("All arabic numerals were deleted");
-                    fclose(f);
-                    fclose(f_out);
+
                     break;
                 case ('i'):
-                    f = fopen(argv[2], "r");
-                    f_out = fopen(argv[3], "w");
                     i_func(f, f_out);
                     printf("All latin literals were counted");
-                    fclose(f);
-                    fclose(f_out);
+
                     break;
                 case ('s'):
-                    f = fopen(argv[2], "r");
-                    f_out = fopen(argv[3], "w");
+
                     s_func(f, f_out);
                     printf("All other symbols were counted");
-                    fclose(f);
-                    fclose(f_out);
+
                     break;
                 case ('a'):
-                    f = fopen(argv[2], "r");
-                    f_out = fopen(argv[3], "w");
                     a_func(f, f_out);
                     printf("All other symbols were counted");
-                    fclose(f);
-                    fclose(f_out);
+
                     break;
             }
+            fclose(f);
+            fclose(f_out);
             break;
         case (3):
             len = strlen(argv[2]) + strlen("out_") + 1;
@@ -277,40 +291,28 @@ int main(int argc, char *argv[]) {
                 case (OK):
                     break;
             }
+            f = fopen(argv[2], "r");
+            f_out = fopen(file_out_name, "w");
             switch (argv[1][1]) {
                 case ('d'):
-                    f = fopen(argv[2], "r");
-                    f_out = fopen(file_out_name, "w");
                     d_func(f, f_out);
                     printf("All arabic numerals were deleted");
-                    fclose(f);
-                    fclose(f_out);
                     break;
                 case ('i'):
-                    f = fopen(argv[2], "r");
-                    f_out = fopen(file_out_name, "w");
                     i_func(f, f_out);
                     printf("All latin literals were counted");
-                    fclose(f);
-                    fclose(f_out);
                     break;
                 case ('s'):
-                    f = fopen(argv[2], "r");
-                    f_out = fopen(file_out_name, "w");
                     s_func(f, f_out);
                     printf("All other symbols were counted");
-                    fclose(f);
-                    fclose(f_out);
                     break;
                 case ('a'):
-                    f = fopen(argv[2], "r");
-                    f_out = fopen(file_out_name, "w");
                     a_func(f, f_out);
                     printf("All other symbols were counted");
-                    fclose(f);
-                    fclose(f_out);
                     break;
             }
+            fclose(f);
+            fclose(f_out);
             free(file_out_name);
             break;
 

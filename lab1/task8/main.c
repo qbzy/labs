@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <limits.h>
+#include <windows.h>
 
 enum Errors {
     OK,
@@ -13,10 +15,27 @@ enum Errors {
     RANGE_ERROR,
 };
 
+enum Errors get_full_path(char *path1, char *path2){
+
+    char fullPath1[MAX_PATH], fullPath2[MAX_PATH];
+
+    if (!path1 || !path2){
+        return NULL_PTR_ERROR;
+    }
+    GetFullPathName(path1, MAX_PATH, fullPath1, NULL);
+    GetFullPathName(path2, MAX_PATH, fullPath2, NULL);
+
+    if (strcmp(fullPath1, fullPath2) == 0){
+        return INVALID_INPUT;
+    }
+    return OK;
+}
 
 enum Errors validation(int argc, char *argv[]) {
     FILE *f;
     FILE *f_out;
+    enum Errors status;
+
     if (argv == NULL) {
         return NULL_PTR_ERROR;
     }
@@ -24,8 +43,9 @@ enum Errors validation(int argc, char *argv[]) {
     if (argc != 3) {
         return INVALID_INPUT;
     }
-    if (strcmp(argv[1], argv[2]) == 0) {
-        return INVALID_INPUT;
+    status = get_full_path(argv[1], argv[2]);
+    if (status != OK){
+        return status;
     }
 
     f = fopen(argv[1], "r");
@@ -87,7 +107,7 @@ enum Errors file_input(FILE *f, FILE *f_out) {
     char *cur_num;
     char *endptr;
     int base;
-    long int decimal_num;
+    long long int decimal_num;
     while (fgets(buf, sizeof(buf), f)) {
         cur_num = strtok(buf, delimiters);
         while (cur_num != NULL) {
@@ -104,15 +124,15 @@ enum Errors file_input(FILE *f, FILE *f_out) {
                 case (INVALID_DATA):
                     return INVALID_DATA;
                 case (OK):
-                    decimal_num = strtol(cur_num, &endptr, base);
+                    decimal_num = strtoll(cur_num, &endptr, base);
 
-                    if (decimal_num == LONG_MIN || decimal_num == LONG_MAX){
+                    if (decimal_num == LLONG_MAX || decimal_num == LLONG_MIN){
                         return RANGE_ERROR;
                     }
                     if (*endptr != '\0') {
                         return INVALID_DATA;
                     }
-                    fprintf(f_out, "%ld %d\n", decimal_num, base);
+                    fprintf(f_out, "%lld %d\n", decimal_num, base);
                     cur_num = strtok(NULL, delimiters);
                     base = 1;
                     break;

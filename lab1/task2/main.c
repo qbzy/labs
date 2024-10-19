@@ -242,7 +242,7 @@ int is_prime(int number) {
 
     if (number % 2 == 0) return 1;
 
-    for (int i = 3; i <= floor(sqrt(number)); i += 2) {
+    for (int i = 3; i * i <= number; i += 2) {
         if (number % i == 0)
             return 1;
     }
